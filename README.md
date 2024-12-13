@@ -1,3 +1,3 @@
 # karebay
 
-A new Flutter project.
+Final Project for mobile application development course
