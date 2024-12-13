@@ -1,33 +1,64 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:karebay/features/presentations.dart';
-import 'package:karebay/features/splash/presentations/splash_screen_controller.dart';
+import '../../../core/constants/costants.dart';
 
-class SplashScreen extends ConsumerStatefulWidget {
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _SplashScreenState();
+  State<StatefulWidget> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends ConsumerState<SplashScreen> {
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus();
+  }
+
+  Future<void> _checkLoginStatus() async {
+    // Simulasi loading splash screen (opsional)
+    await Future.delayed(const Duration(seconds: 2));
+    // Periksa apakah user sudah login
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      // Jika user sudah login, navigasi ke HomeScreen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    } else {
+      // Jika belum login, navigasi ke LoginScreen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-     ref.listen<AsyncValue<void>>(splashScreenControllerProvider,
-        (previous, next) {
-      if (next is AsyncData) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const LoginScreen(),
-          ),
-        );
-      }
-    });
     return const Scaffold(
       body: Center(
-        child: Text('Splash Screen'),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              'Karebay',
+              style: TextStyle(
+                color: Pallete.charcoalBlue,
+              ),
+            ),
+            Text(
+              'Your Personal Assistant',
+              style: TextStyle(
+                color: Pallete.charcoalBlue,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -1,86 +1,135 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:karebay/core/constants/costants.dart';
-import 'package:karebay/features/chat/presentations/widgets/chat_input.dart';
+import 'package:karebay/core/constants/themes/colors/pallete.dart';
+import 'package:provider/provider.dart';
 
-class ChatScreen extends ConsumerStatefulWidget {
+import '../../../core/constants/auth/auth_sevice.dart';
+import '../../../core/constants/themes/utility/utility.dart';
+import '../../../core/constants/themes/widgets/widgets.dart';
+import '../../../core/providers/providers.dart';
+import '../../presentations.dart';
+
+class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _ChatScreenState();
+  State<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends ConsumerState<ChatScreen> {
-  final List<String> messages = [];
+class _ChatScreenState extends State<ChatScreen> {
+  // scroll controller
+  final ScrollController _scrollController = ScrollController();
 
-  void _handleMessageSend(String message) {
-    setState(() {
-      messages.add(message);
-    });
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
-    // Simulasi respons AI
-    Future.delayed(const Duration(seconds: 1), () {
-      setState(() {
-        messages.add('AI Response: $message');
-      });
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients &&
+          _scrollController.position.maxScrollExtent > 0.0) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: Pallete.paleGray,
-        appBar: AppBar(
-          backgroundColor: Pallete.deepOceanBlue,
-          leading: IconButton(
-              onPressed: () => Navigator.pop(context),
+    return Consumer<ChatProvider>(
+      builder: (context, chatProvider, child) {
+        if (chatProvider.inChatMessages.isNotEmpty) {
+          _scrollToBottom();
+        }
+
+        // auto scroll to bottom on new message
+        chatProvider.addListener(() {
+          if (chatProvider.inChatMessages.isNotEmpty) {
+            _scrollToBottom();
+          }
+        });
+
+        return Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
               icon: const Icon(
                 Icons.arrow_back,
-                color: Pallete.lightGrey,
-              )),
-          title: const Text(
-            'KarebayChat',
-            style: TextStyle(
-              color: Pallete.lightGrey,
-              fontWeight: FontWeight.w200,
+                color: Colors.white,
+              ),
+              onPressed: () async {
+                authServicesProvider.signOut();
+                Navigator.pop(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const LoginScreen(),
+                ),
+              );
+              },
             ),
+            backgroundColor: Pallete.charcoalBlue,
+            centerTitle: true,
+            title: const Text(
+              'Karebay',
+              style: TextStyle(color: Colors.white),
+            ),
+            actions: [
+              if (chatProvider.inChatMessages.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: CircleAvatar(
+                    child: IconButton(
+                      icon: const Icon(Icons.add),
+                      onPressed: () async {
+                        // show my animated dialog to start new chat
+                        showMyAnimatedDialog(
+                          context: context,
+                          title: 'Start New Chat',
+                          content: 'Are you sure you want to start a new chat?',
+                          actionText: 'Yes',
+                          onActionPressed: (value) async {
+                            if (value) {
+                              // prepare chat room
+                              await chatProvider.prepareChatRoom(
+                                  isNewChat: true, chatID: '');
+                            }
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                )
+            ],
           ),
-        ),
-        body: Column(
-          children: [
-            Expanded(
-              child: ListView.builder(
-                itemCount: messages.length,
-                itemBuilder: (context, index) {
-                  final isUserMessage = index % 2 == 0;
-                  return Container(
-                    alignment: isUserMessage
-                        ? Alignment.centerRight
-                        : Alignment.centerLeft,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    child: Text(
-                      messages[index],
-                      style: TextStyle(
-                        color: isUserMessage
-                            ? Pallete.deepOceanBlue
-                            : Pallete.mainFontColor,
-                        fontSize: 16,
-                      ),
-                    ),
-                  );
-                },
+          body: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: chatProvider.inChatMessages.isEmpty
+                        ? const Center(
+                            child: Text('Start message'),
+                          )
+                        : ChatMessages(
+                            scrollController: _scrollController,
+                            chatProvider: chatProvider,
+                          ),
+                  ),
+
+                  // input field
+                  BottomChatField(
+                    chatProvider: chatProvider,
+                  )
+                ],
               ),
             ),
-            ChatInput(
-              onSend: _handleMessageSend,
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

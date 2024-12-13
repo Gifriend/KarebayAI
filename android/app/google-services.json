@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "558196251447",
+    "project_id": "karebay-mobile",
+    "storage_bucket": "karebay-mobile.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:558196251447:android:9aa2803f5c72a867d158b2",
+        "android_client_info": {
+          "package_name": "com.example.karebay"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBOWYNNo_1TdWvXxyzaWBpvHpzbSo7148E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

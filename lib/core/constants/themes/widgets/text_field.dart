@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../costants.dart';
+
 const kSendButtonTextStyle = TextStyle(
   color: Colors.grey,
   fontWeight: FontWeight.bold,
@@ -46,4 +48,21 @@ const kTextFieldDecoration = InputDecoration(
     borderSide: BorderSide(color: Colors.black, width: 2.0),
     borderRadius: BorderRadius.all(Radius.circular(20.0)),
   ),
+);
+
+const emailInput = InputDecoration(
+  hintText: 'Email Address',
+  labelText: 'Email Address',
+  filled: true,
+  fillColor: Pallete.whiteColor,
+  border: OutlineInputBorder(
+      borderRadius: BorderRadius.all(
+        Radius.circular(15.0),
+      ),
+      borderSide: BorderSide.none),
+  focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.all(
+        Radius.circular(15.0),
+      ),
+      borderSide: BorderSide.none),
 );
